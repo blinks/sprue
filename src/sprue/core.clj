@@ -1,5 +1,4 @@
 (ns sprue.core
-  (:require [clojure.xml :as xml])
   (:import org.apache.batik.transcoder.TranscoderInput)
   (:gen-class))
 

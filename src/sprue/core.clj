@@ -1,6 +1,7 @@
 (ns sprue.core
   "Ties together card data, card templates, and sheet templates."
   (:import [java.io StringReader]
+           [java.awt Color]
            [org.apache.batik.transcoder TranscoderInput TranscoderOutput]
            [org.apache.batik.transcoder.image PNGTranscoder])
   (:require [clojure.xml :as xml]
@@ -18,12 +19,14 @@
 (defn poker-card ; TODO(#3): implement.
   [& content]
   {:tag :svg
+   ; TODO: Move xmlns to the outermost SVG document (the sheet).
    :attrs {:xmlns "http://www.w3.org/2000/svg" :width "2.5in" :height "3.5in"}
    :content content})
 
 ; 3. Sheet layout, as SVG and Batik Transcoder options.
 ;    https://xmlgraphics.apache.org/batik/using/transcoder.html
 ; TODO
+(defn dpi->hint [dpi] (float (/ 25.4 dpi)))
 (defn svg->string [svg] (with-out-str (xml/emit svg)))
 (defn svg->png
   [svg png]
@@ -32,6 +35,10 @@
     (let [tr (PNGTranscoder.)
           in (TranscoderInput. reader)
           out (TranscoderOutput. writer)]
+      (.addTranscodingHint tr PNGTranscoder/KEY_BACKGROUND_COLOR
+                           Color/white)
+      (.addTranscodingHint tr PNGTranscoder/KEY_PIXEL_UNIT_TO_MILLIMETER
+                           (dpi->hint 300))
       (.transcode tr in out)
       (.flush writer))))
 
